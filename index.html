@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard de Métricas - Meta Ads</title>
+    <title>Nexus Lanzamiento - Dashboard</title>
     
     <!-- 1. Cargar Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -11,7 +11,7 @@
     <!-- 2. Cargar Chart.js (para los gráficos) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
-    <!-- 3. Cargar Lucide (iconos) - URL ACTUALIZADA -->
+    <!-- 3. Cargar Lucide (iconos) -->
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
     
     <!-- 4. Cargar la fuente (Inter) -->
@@ -20,9 +20,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
-        /* ESTILOS PERSONALIZADOS (CSS) */
-        
-        /* ... (Estilos de fuente, body, glass-card, widget-card, chart-glow, skeleton, fadeIn, scrollbar... sin cambios) ... */
         :root {
             font-family: 'Inter', sans-serif;
         }
@@ -31,21 +28,18 @@
             background-color: #0B1120; /* Fondo principal oscuro */
         }
 
-        /* Efecto "Glassmorphism" (vidrio) */
         .glass-card {
-            background: rgba(40, 51, 80, 0.4); /* Color de fondo semi-transparente */
+            background: rgba(40, 51, 80, 0.4); 
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(100, 116, 139, 0.3); /* Borde sutil */
+            border: 1px solid rgba(100, 116, 139, 0.3);
         }
 
-        /* Estilo de los widgets principales */
         .widget-card {
-            background-color: #131B33; /* Fondo de las tarjetas */
-            border: 1px solid #222B45; /* Borde de las tarjetas */
+            background-color: #131B33; 
+            border: 1px solid #222B45;
         }
         
-        /* Efecto de brillo para los gráficos */
         .chart-glow {
             box-shadow: 0 0 20px rgba(59, 130, 246, 0.2), 0 0 40px rgba(59, 130, 246, 0.1);
         }
@@ -54,7 +48,7 @@
         .skeleton {
             position: relative;
             overflow: hidden;
-            background-color: #1E293B; /* Color base del esqueleto */
+            background-color: #1E293B; 
         }
         .skeleton::after {
             content: '';
@@ -67,12 +61,8 @@
             animation: shimmer 2s infinite linear;
         }
         @keyframes shimmer {
-            0% {
-                left: -100%;
-            }
-            100% {
-                left: 100%;
-            }
+            0% { left: -100%; }
+            100% { left: 100%; }
         }
         
         /* Animación de aparición (fade-in) */
@@ -85,19 +75,53 @@
         }
         
         /* Estilos de la barra de scroll */
-        ::-webkit-scrollbar {
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #0B1120; }
+        ::-webkit-scrollbar-thumb { background-color: #222B45; border-radius: 20px; }
+        ::-webkit-scrollbar-thumb:hover { background-color: #334155; }
+        
+        /* Estilos para la navegación de pestañas */
+        .page-content {
+            display: none; /* Ocultar todas las páginas por defecto */
+        }
+        .page-content.active {
+            display: block; /* Mostrar solo la página activa */
+        }
+        
+        /* Estilo activo de la barra lateral */
+        .sidebar-link.active {
+            background-color: #3B82F6; /* Color azul para el link activo */
+            color: #FFFFFF; /* Texto blanco */
+            font-weight: 600;
+        }
+        
+        /* Estilos para tablas */
+        .data-table thead th {
+            background-color: #1E293B; /* slate-800 */
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 0.75rem; /* text-xs */
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #94A3B8; /* slate-400 */
+        }
+        .data-table tbody tr {
+            border-bottom: 1px solid #222B45;
+        }
+        .data-table tbody tr:hover {
+            background-color: #1E293B; /* slate-800 */
+        }
+        .data-table tbody td {
+            padding: 12px 16px;
+            vertical-align: middle;
+            color: #E2E8F0; /* slate-200 */
+        }
+        .data-table .status-dot {
             width: 8px;
             height: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #0B1120;
-        }
-        ::-webkit-scrollbar-thumb {
-            background-color: #222B45;
-            border-radius: 20px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background-color: #334155;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
         }
     </style>
 </head>
@@ -108,12 +132,11 @@
         <!-- ===== Barra Lateral (Sidebar) ===== -->
         <aside id="sidebar" class="fixed left-0 top-0 z-40 flex h-screen w-64 flex-col overflow-y-hidden bg-[#131B33] border-r border-[#222B45] duration-300 ease-linear -translate-x-full lg:translate-x-0 lg:static">
             
-            <!-- ... (Contenido de la barra lateral: Logo, Menú, Widget de Vidrio... sin cambios) ... -->
             <!-- Logo -->
             <div class="flex items-center justify-between gap-2 px-6 py-5.5 lg:py-6.5">
                 <a href="#" class="flex items-center gap-2">
                     <svg class_name="w-8 h-8 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                    <span class="text-xl font-bold text-white">TuLogo</span>
+                    <span class="text-xl font-bold text-white">Nexus</span>
                 </a>
                 <button class="block lg:hidden" id="sidebar-close">
                     <i data-lucide="x" class="w-6 h-6"></i>
@@ -123,37 +146,32 @@
             <!-- Menú de Navegación -->
             <nav class="flex flex-col flex-1 px-4 py-4 overflow-y-auto">
                 <ul class="flex flex-col gap-1.5">
-                    <!-- Dashboard -->
                     <li>
-                        <a href="#" class="group relative flex items-center gap-2.5 rounded-lg bg-blue-600/20 py-2 px-4 font-medium text-blue-300">
+                        <a href="#" class="sidebar-link group relative flex items-center gap-2.5 rounded-lg py-2 px-4 font-medium text-slate-400 active" data-page="page-dashboard">
                             <i data-lucide="layout-dashboard"></i>
                             Dashboard
                         </a>
                     </li>
-                    <!-- Métricas -->
                     <li>
-                        <a href="#" class="group relative flex items-center gap-2.5 rounded-lg py-2 px-4 font-medium text-slate-400 hover:bg-slate-700/50 hover:text-white">
+                        <a href="#" class="sidebar-link group relative flex items-center gap-2.5 rounded-lg py-2 px-4 font-medium text-slate-400 hover:bg-slate-700/50 hover:text-white" data-page="page-metricas">
                             <i data-lucide="bar-chart-3"></i>
                             Métricas
                         </a>
                     </li>
-                    <!-- Campañas -->
                     <li>
-                        <a href="#" class="group relative flex items-center gap-2.5 rounded-lg py-2 px-4 font-medium text-slate-400 hover:bg-slate-700/50 hover:text-white">
+                        <a href="#" class="sidebar-link group relative flex items-center gap-2.5 rounded-lg py-2 px-4 font-medium text-slate-400 hover:bg-slate-700/50 hover:text-white" data-page="page-campanas">
                             <i data-lucide="target"></i>
                             Campañas
                         </a>
                     </li>
-                    <!-- Reportes -->
                     <li>
-                        <a href="#" class="group relative flex items-center gap-2.5 rounded-lg py-2 px-4 font-medium text-slate-400 hover:bg-slate-700/50 hover:text-white">
+                        <a href="#" class="sidebar-link group relative flex items-center gap-2.5 rounded-lg py-2 px-4 font-medium text-slate-400 hover:bg-slate-700/50 hover:text-white" data-page="page-reportes">
                             <i data-lucide="file-text"></i>
                             Reportes
                         </a>
                     </li>
-                    <!-- Configuración -->
                     <li>
-                        <a href="#" class="group relative flex items-center gap-2.5 rounded-lg py-2 px-4 font-medium text-slate-400 hover:bg-slate-700/50 hover:text-white">
+                        <a href="#" class="sidebar-link group relative flex items-center gap-2.5 rounded-lg py-2 px-4 font-medium text-slate-400 hover:bg-slate-700/50 hover:text-white" data-page="page-configuracion">
                             <i data-lucide="settings"></i>
                             Configuración
                         </a>
@@ -161,11 +179,11 @@
                 </ul>
             </nav>
             
-            <!-- Widget de "Vidrio" (Glassmorphism) -->
+            <!-- Widget de "Vidrio" (Presupuesto Restante) -->
             <div class="px-6 py-6 mt-auto">
                 <div class="glass-card rounded-lg p-5 text-center">
                     <h4 class="font-semibold text-white mb-2">Presupuesto Restante</h4>
-                    <div class="text-3xl font-bold text-teal-400 mb-3">$2,304</div>
+                    <div id="budget-remaining-widget" class="text-3xl font-bold text-teal-400 mb-3">...</div>
                     <p class="text-xs text-slate-300 mb-4">Quedan 5 días en el ciclo de facturación.</p>
                     <button class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
                         Añadir Fondos
@@ -180,41 +198,23 @@
             
             <!-- ===== Cabecera (Header) ===== -->
             <header class="sticky top-0 z-30 flex w-full bg-[#0B1120]/80 backdrop-blur-sm border-b border-[#222B45]">
-                <!-- ... (Contenido de la cabecera: Título, Perfil... sin cambios) ... -->
                 <div class="flex flex-grow items-center justify-between px-4 py-4 md:px-6 2xl:px-11">
-                    
-                    <!-- Botón de Menú (móvil) y Título -->
-                    <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-4 w-1/3">
                         <button class="block lg:hidden" id="sidebar-open">
                             <i data-lucide="menu" class="w-6 h-6"></i>
                         </button>
-                        <h1 class="text-xl font-semibold text-white">Dashboard: Meta Ads</h1>
                     </div>
-
-                    <!-- Búsqueda y Perfil -->
-                    <div class="flex items-center gap-4">
-                        <!-- Botón de Búsqueda -->
+                    <div class="w-1/3 text-center">
+                         <h1 class="text-xl font-semibold text-white">Nexus Lanzamiento</h1>
+                    </div>
+                    <div class="flex items-center justify-end gap-4 w-1/3">
                         <button class="p-2 rounded-full hover:bg-slate-700/50">
                             <i data-lucide="search" class="w-5 h-5"></i>
                         </button>
-                        
-                        <!-- Notificaciones -->
                         <button class="relative p-2 rounded-full hover:bg-slate-700/50">
                             <i data-lucide="bell" class="w-5 h-5"></i>
                             <span class="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-500"></span>
                         </button>
-                        
-                        <!-- Perfil de Usuario -->
-                        <div class="relative">
-                            <button class="flex items-center gap-2">
-                                <img src="https://placehold.co/40x40/3B82F6/FFFFFF?text=A&font=inter" alt="Perfil" class="w-10 h-10 rounded-full border-2 border-blue-500">
-                                <div>
-                                    <span class="hidden md:block font-medium text-white">Tu Nombre</span>
-                                    <span class="hidden md:block text-xs text-slate-400">Admin</span>
-                                </div>
-                                <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 hidden md:block"></i>
-                            </button>
-                        </div>
                     </div>
                 </div>
             </header>
@@ -222,111 +222,100 @@
 
             <!-- ===== Área de Contenido Principal ===== -->
             <main>
-                <div class="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
+                <!-- ========= PÁGINA 1: DASHBOARD (ACTIVA POR DEFECTO) ========= -->
+                <div id="page-dashboard" class="page-content active mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
                     
                     <!-- KPIs Principales -->
                     <div class="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5 mb-6">
-                        <!-- ... (Widgets de KPIs... sin cambios) ... -->
-                        <!-- KPI 1: Clics -->
+                        
+                        <!-- KPI 1: Leads Totales -->
                         <div class="widget-card rounded-lg p-6 shadow-default">
-                            <!-- Contenido de carga -->
                             <div class="skeleton-wrapper">
                                 <div class="skeleton h-8 w-3/4 mb-3 rounded"></div>
                                 <div class="skeleton h-5 w-1/2 rounded"></div>
                             </div>
-                            <!-- Contenido real -->
                             <div class="widget-content opacity-0">
                                 <div class="flex items-center justify-between">
                                     <div>
-                                        <h4 class="text-sm font-medium text-slate-400">Clics Totales</h4>
-                                        <span class="text-3xl font-bold text-white">12,450</span>
+                                        <h4 class="text-sm font-medium text-slate-400">Leads Totales</h4>
+                                        <span id="total-leads-kpi" class="text-3xl font-bold text-white">...</span>
                                     </div>
                                     <span class="flex items-center justify-center w-12 h-12 rounded-full bg-blue-600/20 text-blue-400">
-                                        <i data-lucide="mouse-pointer-click" class="w-6 h-6"></i>
+                                        <i data-lucide="users" class="w-6 h-6"></i>
                                     </span>
                                 </div>
                                 <div class="flex items-center gap-2 mt-2 text-sm text-green-400">
                                     <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
-                                    <span>12.5%</span>
-                                    <span class="text-slate-400">vs mes anterior</span>
+                                    <span id="total-leads-change">...</span>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- KPI 2: Impresiones -->
+                        <!-- KPI 2: Costo por Lead (CPL) -->
                         <div class="widget-card rounded-lg p-6 shadow-default">
-                            <!-- Contenido de carga -->
                             <div class="skeleton-wrapper">
                                 <div class="skeleton h-8 w-3/4 mb-3 rounded"></div>
                                 <div class="skeleton h-5 w-1/2 rounded"></div>
                             </div>
-                            <!-- Contenido real -->
                             <div class="widget-content opacity-0">
                                 <div class="flex items-center justify-between">
                                     <div>
-                                        <h4 class="text-sm font-medium text-slate-400">Impresiones</h4>
-                                        <span class="text-3xl font-bold text-white">1.2M</span>
+                                        <h4 class="text-sm font-medium text-slate-400">Costo por Lead (CPL)</h4>
+                                        <span id="cpl-kpi" class="text-3xl font-bold text-white">...</span>
                                     </div>
                                     <span class="flex items-center justify-center w-12 h-12 rounded-full bg-teal-600/20 text-teal-400">
-                                        <i data-lucide="eye" class="w-6 h-6"></i>
+                                        <i data-lucide="user-check" class="w-6 h-6"></i>
                                     </span>
                                 </div>
-                                <div class="flex items-center gap-2 mt-2 text-sm text-green-400">
+                                <div class="flex items-center gap-2 mt-2 text-sm text-red-400">
                                     <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
-                                    <span>8.2%</span>
-                                    <span class="text-slate-400">vs mes anterior</span>
+                                    <span id="cpl-change">...</span>
                                 </div>
                             </div>
                         </div>
                         
                         <!-- KPI 3: CTR -->
                         <div class="widget-card rounded-lg p-6 shadow-default">
-                            <!-- Contenido de carga -->
-                            <div class="skeleton-wrapper">
+                             <div class="skeleton-wrapper">
                                 <div class="skeleton h-8 w-3/4 mb-3 rounded"></div>
                                 <div class="skeleton h-5 w-1/2 rounded"></div>
                             </div>
-                            <!-- Contenido real -->
                             <div class="widget-content opacity-0">
                                 <div class="flex items-center justify-between">
                                     <div>
                                         <h4 class="text-sm font-medium text-slate-400">CTR (Click-Through Rate)</h4>
-                                        <span class="text-3xl font-bold text-white">1.04%</span>
+                                        <span id="ctr-kpi" class="text-3xl font-bold text-white">...%</span>
                                     </div>
                                     <span class="flex items-center justify-center w-12 h-12 rounded-full bg-purple-600/20 text-purple-400">
                                         <i data-lucide="percent" class="w-6 h-6"></i>
                                     </span>
                                 </div>
-                                <div class="flex items-center gap-2 mt-2 text-sm text-red-400">
-                                    <i data-lucide="arrow-down-right" class="w-4 h-4"></i>
-                                    <span>-0.5%</span>
-                                    <span class="text-slate-400">vs mes anterior</span>
+                                <div class="flex items-center gap-2 mt-2 text-sm text-green-400">
+                                    <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+                                    <span id="ctr-change">...</span>
                                 </div>
                             </div>
                         </div>
 
                         <!-- KPI 4: Gasto Total -->
                         <div class="widget-card rounded-lg p-6 shadow-default">
-                            <!-- Contenido de carga -->
                             <div class="skeleton-wrapper">
                                 <div class="skeleton h-8 w-3/4 mb-3 rounded"></div>
                                 <div class="skeleton h-5 w-1/2 rounded"></div>
                             </div>
-                            <!-- Contenido real -->
                             <div class="widget-content opacity-0">
                                 <div class="flex items-center justify-between">
                                     <div>
                                         <h4 class="text-sm font-medium text-slate-400">Gasto Total</h4>
-                                        <span class="text-3xl font-bold text-white">$5,820</span>
+                                        <span id="total-spend-kpi" class="text-3xl font-bold text-white">...</span>
                                     </div>
                                     <span class="flex items-center justify-center w-12 h-12 rounded-full bg-green-600/20 text-green-400">
                                         <i data-lucide="dollar-sign" class="w-6 h-6"></i>
                                     </span>
                                 </div>
                                 <div class="flex items-center gap-2 mt-2 text-sm text-slate-400">
-                                    <i data-lucide="minus" class="w-4 h-4"></i>
-                                    <span>2.0%</span>
-                                    <span class="text-slate-400">vs mes anterior</span>
+                                    <i data-lucide="calendar" class="w-4 h-4"></i>
+                                    <span>Últimos 30 días</span>
                                 </div>
                             </div>
                         </div>
@@ -337,31 +326,23 @@
                         
                         <!-- Gráfico Principal (Rendimiento General) -->
                         <div class="widget-card rounded-lg p-6 shadow-default xl:col-span-2">
-                            <!-- ... (Contenido del gráfico principal... sin cambios) ... -->
-                            <h4 class="text-lg font-semibold text-white mb-4">Rendimiento General (Últimos 30 días)</h4>
-                            
-                            <!-- Contenido de carga -->
+                            <h4 class="text-lg font-semibold text-white mb-4">Rendimiento General (Leads vs Frecuencia)</h4>
                             <div class="skeleton-wrapper">
                                 <div class="skeleton h-80 w-full rounded-lg"></div>
                             </div>
-                            <!-- Contenido real (Gráfico) -->
                             <div class="widget-content opacity-0 h-80">
                                 <canvas id="mainChart" class="chart-glow"></canvas>
                             </div>
                         </div>
                         
-                        <!-- Gráfico Donut (ROAS) -->
+                        <!-- Leads por País -->
                         <div class="widget-card rounded-lg p-6 shadow-default">
-                            <!-- ... (Contenido del gráfico ROAS... sin cambios) ... -->
-                            <h4 class="text-lg font-semibold text-white mb-4">Gasto vs Retorno (ROAS)</h4>
-                            
-                            <!-- Contenido de carga -->
+                            <h4 class="text-lg font-semibold text-white mb-4">Leads por País</h4>
                             <div class="skeleton-wrapper">
                                 <div class="skeleton h-80 w-full rounded-lg"></div>
                             </div>
-                            <!-- Contenido real (Gráfico) -->
                             <div class="widget-content opacity-0 h-80 flex items-center justify-center">
-                                <canvas id="roasChart" class="chart-glow"></canvas>
+                                <canvas id="geoChart"></canvas>
                             </div>
                         </div>
 
@@ -370,19 +351,15 @@
                     <!-- Fila de Gráficos Secundarios -->
                     <div class="grid grid-cols-1 gap-4 md:gap-6 xl:grid-cols-2 2xl:gap-7.5">
 
-                        <!-- Gráfico de Barras (Top Campañas) -->
+                        <!-- Rendimiento por Campaña (CPC) -->
                         <div class="widget-card rounded-lg p-6 shadow-default relative"> 
-                            <h4 class="text-lg font-semibold text-white mb-4">Rendimiento por Campaña</h4>
-                            
-                            <!-- Contenido de carga -->
+                             <h4 class="text-lg font-semibold text-white mb-4">Rendimiento por Campaña (CPC)</h4>
                             <div class="skeleton-wrapper">
                                 <div class="skeleton h-80 w-full rounded-lg"></div>
                             </div>
-                            <!-- Contenido real (Gráfico) -->
                             <div class="widget-content opacity-0 h-80">
                                 <canvas id="campaignChart"></canvas>
                             </div>
-
                             <!-- Overlay de Actualización -->
                             <div id="campaign-refresh-overlay" class="absolute inset-0 bg-[#131B33]/80 backdrop-blur-sm flex items-center justify-center text-white font-medium rounded-lg opacity-0 transition-opacity duration-300 pointer-events-none z-10">
                                 <i data-lucide="refresh-cw" class="w-6 h-6 animate-spin mr-2"></i>
@@ -390,24 +367,192 @@
                             </div>
                         </div>
                         
-                        <!-- Gráfico de Barras Horizontales (Demografía) -->
+                        <!-- Top 5 Anuncios (por Leads) -->
                         <div class="widget-card rounded-lg p-6 shadow-default">
-                            <!-- ... (Contenido del gráfico de demografía... sin cambios) ... -->
-                            <h4 class="text-lg font-semibold text-white mb-4">Clics por Edad</h4>
-                            
-                            <!-- Contenido de carga -->
+                             <h4 class="text-lg font-semibold text-white mb-4">Top 5 Anuncios (por Leads)</h4>
                             <div class="skeleton-wrapper">
                                 <div class="skeleton h-80 w-full rounded-lg"></div>
                             </div>
-                            <!-- Contenido real (Gráfico) -->
                             <div class="widget-content opacity-0 h-80">
-                                <canvas id="demographicsChart"></canvas>
+                                <canvas id="topAdsChart"></canvas>
                             </div>
                         </div>
                         
                     </div>
 
                 </div>
+                
+                <!-- ========= PÁGINAS OCULTAS (AHORA CON CONTENIDO) ========= -->
+                
+                <!-- PÁGINA 2: MÉTRICAS -->
+                <div id="page-metricas" class="page-content mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
+                    <div class="widget-card rounded-lg shadow-default overflow-hidden">
+                        <div class="p-6">
+                            <h2 class="text-2xl font-semibold text-white">Métricas Detalladas</h2>
+                            <p class="text-slate-300 mt-2">Un desglose completo del rendimiento por campaña de los últimos 30 días.</p>
+                        </div>
+                        
+                        <!-- Tabla de Métricas -->
+                        <div class="overflow-x-auto">
+                            <table class="data-table w-full min-w-[1000px]">
+                                <thead>
+                                    <tr>
+                                        <th>Campaña</th>
+                                        <th>Leads</th>
+                                        <th>Gasto</th>
+                                        <th>CPL</th>
+                                        <th>CTR</th>
+                                        <th>Clics</th>
+                                        <th>Impresiones</th>
+                                        <th>CPC</th>
+                                        <th>Frecuencia</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="metrics-table-body">
+                                    <!-- El contenido se generará con JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- PÁGINA 3: CAMPAÑAS -->
+                <div id="page-campanas" class="page-content mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
+                    <div class="widget-card rounded-lg shadow-default overflow-hidden">
+                        <div class="p-6">
+                            <h2 class="text-2xl font-semibold text-white">Gestión de Campañas</h2>
+                            <p class="text-slate-300 mt-2">Vista general del estado y rendimiento principal de todas las campañas.</p>
+                        </div>
+                        
+                        <!-- Tabla de Campañas -->
+                         <div class="overflow-x-auto">
+                            <table class="data-table w-full">
+                                <thead>
+                                    <tr>
+                                        <th>Estado</th>
+                                        <th>Campaña</th>
+                                        <th>Gasto</th>
+                                        <th>Leads</th>
+                                        <th>CPL</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="campaigns-table-body">
+                                    <!-- El contenido se generará con JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- PÁGINA 4: REPORTES -->
+                <div id="page-reportes" class="page-content mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
+                     <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                        
+                        <div class="widget-card rounded-lg p-6 shadow-default">
+                            <h2 class="text-2xl font-semibold text-white mb-5">Generar Reporte</h2>
+                            
+                            <form action="#" method="POST">
+                                <div class="mb-4">
+                                    <label class="mb-2 block text-sm font-medium text-slate-300" for="reportType">
+                                        Tipo de Reporte
+                                    </label>
+                                    <select id="reportType" class="w-full rounded-lg border border-slate-700 bg-slate-800 p-2.5 text-white focus:border-blue-500 focus:ring-blue-500">
+                                        <option selected>Rendimiento General</option>
+                                        <option>Desglose por Campaña</option>
+                                        <option>Desglose por Anuncio</option>
+                                        <option>Desglose Demográfico</option>
+                                    </select>
+                                </div>
+
+                                <div class="grid grid-cols-1 gap-4 md:grid-cols-2 mb-6">
+                                    <div>
+                                        <label class="mb-2 block text-sm font-medium text-slate-300" for="startDate">
+                                            Fecha de Inicio
+                                        </label>
+                                        <input type="date" id="startDate" class="w-full rounded-lg border border-slate-700 bg-slate-800 p-2.5 text-white focus:border-blue-500 focus:ring-blue-500" value="2025-10-01">
+                                    </div>
+                                    <div>
+                                        <label class="mb-2 block text-sm font-medium text-slate-300" for="endDate">
+                                            Fecha de Fin
+                                        </label>
+                                        <input type="date" id="endDate" class="w-full rounded-lg border border-slate-700 bg-slate-800 p-2.5 text-white focus:border-blue-500 focus:ring-blue-500" value="2025-10-31">
+                                    </div>
+                                </div>
+                                
+                                <div class="flex gap-4">
+                                    <button type="button" class="flex-1 rounded-lg bg-blue-600 px-6 py-3 text-base font-medium text-white hover:bg-blue-700 transition-colors">
+                                        Generar (.CSV)
+                                    </button>
+                                    <button type="button" class="flex-1 rounded-lg bg-slate-700 px-6 py-3 text-base font-medium text-white hover:bg-slate-600 transition-colors">
+                                        Generar (.PDF)
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <div class="widget-card rounded-lg p-6 shadow-default">
+                            <h2 class="text-2xl font-semibold text-white mb-5">Reportes Guardados</h2>
+                            <ul class="flex flex-col gap-4">
+                                <li class="flex items-center justify-between rounded-lg bg-slate-800 p-4">
+                                    <div>
+                                        <h4 class="font-medium text-white">Reporte_Octubre_General.pdf</h4>
+                                        <span class="text-sm text-slate-400">01 Nov 2025 - 1.2MB</span>
+                                    </div>
+                                    <button class="p-2 text-slate-400 hover:text-white">
+                                        <i data-lucide="download"></i>
+                                    </button>
+                                </li>
+                                <li class="flex items-center justify-between rounded-lg bg-slate-800 p-4">
+                                    <div>
+                                        <h4 class="font-medium text-white">Reporte_Campañas_Q3.csv</h4>
+                                        <span class="text-sm text-slate-400">01 Oct 2025 - 800KB</span>
+                                    </div>
+                                    <button class="p-2 text-slate-400 hover:text-white">
+                                        <i data-lucide="download"></i>
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                     </div>
+                </div>
+                
+                <!-- PÁGINA 5: CONFIGURACIÓN -->
+                <div id="page-configuracion" class="page-content mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
+                     <div class="max-w-xl mx-auto">
+                        <div class="widget-card rounded-lg p-6 shadow-default">
+                            <h2 class="text-2xl font-semibold text-white mb-5">Configuración</h2>
+                            
+                            <form action="#" method="POST">
+                                <div class="mb-4">
+                                    <label class="mb-2 block text-sm font-medium text-slate-300" for="apiToken">
+                                        Tu Access Token (Proxy)
+                                    </label>
+                                    <input type="password" id="apiToken" class="w-full rounded-lg border border-slate-700 bg-slate-800 p-2.5 text-white focus:border-blue-500 focus:ring-blue-500" value="xxxxxxxxxxxxxx">
+                                    <p class="mt-1 text-xs text-slate-500">Esta clave se almacena de forma segura.</p>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <label class="mb-2 block text-sm font-medium text-slate-300" for="adAccount">
+                                        Ad Account ID
+                                    </label>
+                                    <input type="text" id="adAccount" class="w-full rounded-lg border border-slate-700 bg-slate-800 p-2.5 text-white focus:border-blue-500 focus:ring-blue-500" value="act_114784... (Simulado)">
+                                </div>
+                                
+                                <div class="mb-6">
+                                    <label class="mb-2 block text-sm font-medium text-slate-300" for="initialBudget">
+                                        Presupuesto Inicial (COP)
+                                    </label>
+                                    <input type="number" id="initialBudget" class="w-full rounded-lg border border-slate-700 bg-slate-800 p-2.5 text-white focus:border-blue-500 focus:ring-blue-500" value="3000000">
+                                </div>
+
+                                <button type="button" class="w-full rounded-lg bg-blue-600 px-6 py-3 text-base font-medium text-white hover:bg-blue-700 transition-colors">
+                                    Guardar Cambios
+                                </button>
+                            </form>
+                        </div>
+                     </div>
+                </div>
+
             </main>
             <!-- ===== Fin Área de Contenido Principal ===== -->
             
@@ -416,26 +561,35 @@
 
     </div>
 
-    <!-- ===== LÓGICA DE JAVASCRIPT ===== -->
+    <!-- ===== LÓGINA DE JAVASCRIPT ===== -->
     <script>
-        // --- CONFIGURACIÓN DE LA API DE META ---
-        // ¡IMPORTANTE! Reemplaza estos valores con tus propios datos.
-        const META_ACCESS_TOKEN = '61583468942782'; // Tu token con permisos ads_read
-        const AD_ACCOUNT_ID = 'act_1147840960820826'; // Tu ID de cuenta de anuncios (con prefijo act_)
-        // --- FIN DE LA CONFIGURACIÓN ---
+        // --- CONFIGURACIÓN DEL PRESUPUESTO ---
+        const PRESUPUESTO_INICIAL = 3000000; // <-- ¡IMPORTANTE! Pon tu presupuesto total en COP aquí
+        
+        // --- NUEVO: Función para formatear Pesos Colombianos ---
+        const formatCurrency = (value) => {
+            if (typeof value !== 'number') {
+                value = parseFloat(value) || 0;
+            }
+            return new Intl.NumberFormat('es-CO', {
+                style: 'currency',
+                currency: 'COP',
+                minimumFractionDigits: 0, // Ajusta si prefieres no ver centavos
+                maximumFractionDigits: 2,
+            }).format(value);
+        };
 
-
-        // Configuración global de Chart.js para modo oscuro
-        Chart.defaults.color = '#94a3b8'; // slate-400
-        Chart.defaults.borderColor = '#334155'; // slate-700
+        // --- Configuración global de Chart.js y variables... ---
+        Chart.defaults.color = '#94a3b8'; 
+        Chart.defaults.borderColor = '#334155';
         Chart.defaults.font.family = 'Inter, sans-serif';
-
-        // --- Variables Globales para Gráficos ---
-        let campaignChartInstance = null; 
-
+        
+        let mainChartInstance = null;
+        let campaignChartInstance = null;
+        let geoChartInstance = null;
+        let topAdsChartInstance = null; 
 
         // --- Lógica Principal (Animación, Menú, Gráficos) ---
-        
         document.addEventListener('DOMContentLoaded', () => {
             
             // 1. Inicializar iconos
@@ -449,22 +603,41 @@
             const sidebar = document.getElementById('sidebar');
             const sidebarOpen = document.getElementById('sidebar-open');
             const sidebarClose = document.getElementById('sidebar-close');
-
             sidebarOpen?.addEventListener('click', () => {
                 sidebar.classList.remove('-translate-x-full');
             });
-
             sidebarClose?.addEventListener('click', () => {
                 sidebar.classList.add('-translate-x-full');
             });
+            
+            // 3. Lógica de Navegación por Pestañas
+            const sidebarLinks = document.querySelectorAll('.sidebar-link');
+            const pages = document.querySelectorAll('.page-content');
 
-            // 3. Lógica de la Animación de Carga
+            sidebarLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const pageId = link.getAttribute('data-page');
+
+                    pages.forEach(page => page.classList.remove('active'));
+                    sidebarLinks.forEach(l => l.classList.remove('active'));
+
+                    document.getElementById(pageId)?.classList.add('active');
+                    link.classList.add('active');
+                    
+                    if (window.innerWidth < 1024) {
+                         sidebar.classList.add('-translate-x-full');
+                    }
+                });
+            });
+
+
+            // 4. Lógica de la Animación de Carga
             const skeletons = document.querySelectorAll('.skeleton-wrapper');
             const widgets = document.querySelectorAll('.widget-content');
 
             widgets.forEach(w => w.classList.add('opacity-0', 'h-0', 'overflow-hidden'));
             
-            // Simular carga de datos (2 segundos) - Mantenemos esto para los widgets estéticos
             setTimeout(() => {
                 skeletons.forEach(s => s.classList.add('hidden'));
                 
@@ -473,92 +646,155 @@
                     w.classList.add('fade-in');
                 });
                 
-                // Inicializar los gráficos
                 initMainChart();
-                initRoasChart();
-                initCampaignChart(); // Inicializa el gráfico (aún vacío o con datos iniciales)
-                initDemographicsChart();
+                initGeoChart();
+                initCampaignChart(); 
+                initTopAdsChart();
                 
-                // Cargar datos de campañas por primera vez
-                updateCampaignData(); 
-
-                // Iniciar el temporizador de actualización
-                setInterval(updateCampaignData, 90000); // 90000ms = 90 segundos
+                updateAllMetrics(); 
+                setInterval(updateAllMetrics, 90000); // Actualiza cada 90 segundos
 
             }, 2000); 
         });
         
         
-        // --- CAMBIO: FUNCIÓN `updateCampaignData` AHORA USA FETCH ---
+        // --- FUNCIÓN PARA ACTUALIZAR TODAS LAS MÉTRICAS (CONECTADA AL PROXY) ---
         
-        function updateCampaignData() {
-            const overlay = document.getElementById('campaign-refresh-overlay');
-            if (!campaignChartInstance || !overlay) {
-                console.log("No se puede actualizar, el gráfico o el overlay no existen.");
-                return;
-            }
-
-            // 1. Validar que el token y el ID no sean los de por defecto
-            if (META_ACCESS_TOKEN === 'TU_ACCESS_TOKEN_AQUI' || AD_ACCOUNT_ID === 'act_TU_AD_ACCOUNT_ID_AQUI') {
-                console.warn("Por favor, añade tu ACCESS_TOKEN y AD_ACCOUNT_ID en el script.");
-                // Opcional: podrías ocultar el overlay si ya estaba visible
-                overlay.classList.remove('opacity-100');
-                overlay.classList.add('opacity-0', 'pointer-events-none');
-                return; // No continuar si no hay credenciales
-            }
+        async function updateAllMetrics() {
             
-            // 2. Construir la URL de la API
-            const apiUrl = `https://graph.facebook.com/v19.0/${AD_ACCOUNT_ID}/insights?fields=campaign_name,cpc&date_preset=last_30d&access_token=${META_ACCESS_TOKEN}`;
+            console.log("Iniciando actualización de métricas (desde /api/meta-datos)...");
+            const overlay = document.getElementById('campaign-refresh-overlay');
+            overlay?.classList.remove('opacity-0', 'pointer-events-none');
+            overlay?.classList.add('opacity-100');
 
-            // 3. Mostrar overlay de actualización
-            overlay.classList.remove('opacity-0', 'pointer-events-none');
-            overlay.classList.add('opacity-100');
+            // --- CAMBIO: Reemplazamos toda la simulación con una llamada fetch real a nuestro proxy ---
+            try {
+                const response = await fetch('/api/meta-datos');
+                if (!response.ok) {
+                    const err = await response.json();
+                    throw new Error(err.error || "Error del servidor proxy");
+                }
+                
+                const data = await response.json();
+                
+                // --- 1. Actualizar KPIs ---
+                const kpis = data.kpis;
+                document.getElementById('total-leads-kpi').innerText = kpis.leads.toLocaleString();
+                document.getElementById('cpl-kpi').innerText = formatCurrency(kpis.cpl);
+                document.getElementById('ctr-kpi').innerText = `${kpis.ctr.toFixed(2)}%`;
+                document.getElementById('total-spend-kpi').innerText = formatCurrency(kpis.spend);
+                
+                // Usamos los datos "prev" simulados que nos da el proxy
+                document.getElementById('total-leads-change').innerText = `+${((kpis.leads - kpis.prev_leads) / kpis.prev_leads * 100).toFixed(1)}%`;
+                document.getElementById('cpl-change').innerText = `+${((kpis.cpl - kpis.prev_cpl) / kpis.prev_cpl * 100).toFixed(1)}%`;
+                document.getElementById('ctr-change').innerText = `+${((kpis.ctr - kpis.prev_ctr) / kpis.prev_ctr * 100).toFixed(1)}%`;
 
-            // 4. Realizar la llamada a la API
-            fetch(apiUrl)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`Error de red o API: ${response.statusText}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data && data.data) {
-                        // 5. Procesar los datos
-                        const labels = data.data.map(item => item.campaign_name);
-                        const cpcData = data.data.map(item => parseFloat(item.cpc || 0)); // Asegurarse de que sea un número
+                // --- 2. Actualizar Presupuesto Restante ---
+                const remainingBudget = PRESUPUESTO_INICIAL - kpis.spend;
+                document.getElementById('budget-remaining-widget').innerText = formatCurrency(remainingBudget);
 
-                        // 6. Asignar los nuevos datos al gráfico
-                        campaignChartInstance.data.labels = labels;
-                        campaignChartInstance.data.datasets[0].data = cpcData;
-                        
-                        // 7. Llamar a update() - ¡Esto genera la transición fluida!
-                        campaignChartInstance.update();
-                    } else {
-                        console.error("Respuesta inesperada de la API:", data);
-                    }
-                })
-                .catch(error => {
-                    console.error("Error al cargar datos de campañas:", error);
-                    // NOTA IMPORTANTE: Si ves un error de 'CORS' aquí,
-                    // significa que la API de Meta no permite ser llamada
-                    // directamente desde un archivo HTML en tu navegador.
-                    // Necesitarás un servidor (backend o proxy)
-                    // para hacer esta llamada de forma segura.
-                })
-                .finally(() => {
-                    // 8. Ocultar el overlay de actualización
-                    overlay.classList.remove('opacity-100');
-                    overlay.classList.add('opacity-0', 'pointer-events-none');
-                });
+                // --- 3. Actualizar Gráfico de Campañas (CPC) ---
+                if (campaignChartInstance) {
+                    campaignChartInstance.data.labels = data.campaigns.map(c => c.campaign_name);
+                    campaignChartInstance.data.datasets[0].data = data.campaigns.map(c => c.cpc);
+                    campaignChartInstance.update();
+                }
+                
+                // --- 4. Actualizar Gráfico de Leads por País ---
+                if (geoChartInstance) {
+                    const sortedGeo = data.geo.sort((a, b) => b.leads - a.leads);
+                    geoChartInstance.data.labels = sortedGeo.map(g => g.country_name || g.country); // 'country_name' es más amigable
+                    geoChartInstance.data.datasets[0].data = sortedGeo.map(g => g.leads);
+                    geoChartInstance.update();
+                }
+                
+                // --- 5. Actualizar Gráfico de Top Anuncios ---
+                if (topAdsChartInstance) {
+                    const sortedAds = data.topAds.sort((a, b) => b.leads - a.leads);
+                    topAdsChartInstance.data.labels = sortedAds.map(a => a.ad_name);
+                    topAdsChartInstance.data.datasets[0].data = sortedAds.map(a => a.leads);
+                    topAdsChartInstance.update();
+                }
+                
+                // --- 6. Actualizar Gráfico Principal (Leads vs Frecuencia) ---
+                if (mainChartInstance) {
+                    // (Mantenemos simulación para el gráfico de tiempo, ya que no pedimos datos diarios)
+                    mainChartInstance.data.labels = ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4'];
+                    mainChartInstance.data.datasets[0].data = [kpis.leads * 0.2, kpis.leads * 0.3, kpis.leads * 0.25, kpis.leads * 0.25]; 
+                    mainChartInstance.data.datasets[1].data = [kpis.frequency * 0.8, kpis.frequency * 0.9, kpis.frequency * 1.1, kpis.frequency]; 
+                    mainChartInstance.update();
+                }
+                
+                // --- 7. Poblar las tablas ---
+                populateMetricsTable(data.campaigns);
+                populateCampaignsTable(data.campaigns);
+
+            } catch (error) {
+                console.error("Error al cargar métricas desde el proxy:", error);
+                // No mostramos un alert al usuario para no ser molestos, solo en la consola.
+                console.error(`Error al conectar con la API: ${error.message}`);
+            } finally {
+                overlay?.classList.remove('opacity-100');
+                overlay?.classList.add('opacity-0', 'pointer-events-none');
+            }
+        }
+        
+        // --- Funciones para poblar las tablas ---
+
+        function populateMetricsTable(campaigns) {
+            const tbody = document.getElementById('metrics-table-body');
+            if (!tbody) return;
+            
+            tbody.innerHTML = ''; // Limpiar tabla
+            
+            campaigns.forEach(campaign => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="font-medium">${campaign.campaign_name}</td>
+                    <td>${campaign.leads.toLocaleString()}</td>
+                    <td>${formatCurrency(campaign.spend)}</td>
+                    <td>${formatCurrency(campaign.cpl)}</td>
+                    <td>${campaign.ctr.toFixed(2)}%</td>
+                    <td>${campaign.clicks.toLocaleString()}</td>
+                    <td>${campaign.impressions.toLocaleString()}</td>
+                    <td>${formatCurrency(campaign.cpc)}</td>
+                    <td>${campaign.frequency.toFixed(1)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+        
+        function populateCampaignsTable(campaigns) {
+            const tbody = document.getElementById('campaigns-table-body');
+            if (!tbody) return;
+            
+            tbody.innerHTML = ''; // Limpiar tabla
+            
+            campaigns.forEach(campaign => {
+                const tr = document.createElement('tr');
+                
+                const statusDotClass = campaign.status === 'Active' ? 'bg-green-500' : 'bg-slate-500';
+                
+                tr.innerHTML = `
+                    <td>
+                        <div class="flex items-center">
+                            <span class="status-dot ${statusDotClass}"></span>
+                            ${campaign.status === 'Active' ? 'Activa' : 'Pausada'}
+                        </div>
+                    </td>
+                    <td class="font-medium">${campaign.campaign_name}</td>
+                    <td>${formatCurrency(campaign.spend)}</td>
+                    <td>${campaign.leads.toLocaleString()}</td>
+                    <td>${formatCurrency(campaign.cpl)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
         }
 
 
         // --- Inicialización de Gráficos ---
 
-        // 1. Gráfico Principal (Línea)
         function initMainChart() {
-            // ... (Función initMainChart sin cambios) ...
             const ctx = document.getElementById('mainChart');
             if (!ctx) return;
             
@@ -566,4 +802,211 @@
             gradientBlue.addColorStop(0, 'rgba(59, 130, 246, 0.5)');
             gradientBlue.addColorStop(1, 'rgba(59, 130, 246, 0)');
             
-            const gradientTeal = ctx.getContext('2d').createLinearGradient(0, 0
+            const gradientPurple = ctx.getContext('2d').createLinearGradient(0, 0, 0, 400);
+            gradientPurple.addColorStop(0, 'rgba(168, 85, 247, 0.5)'); 
+            gradientPurple.addColorStop(1, 'rgba(168, 85, 247, 0)');
+
+            mainChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [], 
+                    datasets: [
+                        {
+                            label: 'Leads',
+                            data: [],
+                            borderColor: '#3B82F6', 
+                            backgroundColor: gradientBlue,
+                            fill: true,
+                            tension: 0.4,
+                            yAxisID: 'yLeads', 
+                        },
+                        {
+                            label: 'Frecuencia',
+                            data: [],
+                            borderColor: '#A855F7', 
+                            backgroundColor: gradientPurple,
+                            fill: true,
+                            tension: 0.4,
+                            yAxisID: 'yFrequency', 
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        yLeads: {
+                            type: 'linear',
+                            position: 'left',
+                            beginAtZero: true,
+                            grid: {
+                                drawOnChartArea: false 
+                            },
+                            ticks: {
+                                callback: (value) => value.toLocaleString()
+                            }
+                        },
+                        yFrequency: {
+                            type: 'linear',
+                            position: 'right',
+                            beginAtZero: true,
+                            min: 1, 
+                            ticks: {
+                                callback: (value) => value.toFixed(1) 
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { position: 'top', align: 'end' },
+                        tooltip: { 
+                            mode: 'index', 
+                            intersect: false,
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        if (context.dataset.yAxisID === 'yLeads') {
+                                            label += context.parsed.y.toLocaleString();
+                                        } else {
+                                            label += context.parsed.y.toFixed(1);
+                                        }
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    interaction: { intersect: false, mode: 'index' }
+                }
+            });
+        }
+
+        function initGeoChart() {
+            const ctx = document.getElementById('geoChart');
+            if (!ctx) return;
+
+            geoChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [], // Países
+                    datasets: [{
+                        label: 'Leads',
+                        data: [], // Cantidad de leads
+                        backgroundColor: [
+                            '#06B6D4', '#0E7490', '#155E75', '#164E63', '#083344' // Tonos de cyan
+                        ],
+                        borderRadius: 4,
+                        maxBarThickness: 25,
+                    }]
+                },
+                options: {
+                    indexAxis: 'y', 
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: { 
+                            beginAtZero: true,
+                            ticks: {
+                                callback: (value) => value.toLocaleString()
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function initCampaignChart() {
+            const ctx = document.getElementById('campaignChart');
+            if (!ctx) return;
+
+            campaignChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [], 
+                    datasets: [{
+                        label: 'CPC (Costo por Clic)',
+                        data: [], 
+                        backgroundColor: '#3B82F6',
+                        borderRadius: 4,
+                        maxBarThickness: 30,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: (value) => formatCurrency(value) // <-- CAMBIO A COP
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += formatCurrency(context.parsed.y); // <-- CAMBIO A COP
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function initTopAdsChart() {
+            const ctx = document.getElementById('topAdsChart');
+            if (!ctx) return;
+
+            topAdsChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [], 
+                    datasets: [{
+                        label: 'Leads',
+                        data: [], 
+                        backgroundColor: [
+                            '#10B981', '#059669', '#047857', '#065F46', '#064E3B' // Tonos de verde
+                        ],
+                        borderRadius: 4,
+                        maxBarThickness: 25,
+                    }]
+                },
+                options: {
+                    indexAxis: 'y', 
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: { 
+                            beginAtZero: true,
+                            ticks: {
+                                callback: (value) => value.toLocaleString()
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+    </script>
+
+</body>
+</html>
