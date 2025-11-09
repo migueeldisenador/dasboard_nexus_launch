@@ -1,0 +1,139 @@
+// Este es un Servidor "Serverless" que se ejecuta en Vercel.
+// Su trabajo es llamar a la API de Meta de forma segura.
+
+// Función de ayuda para formatear la respuesta de Meta
+function getLeadCount(actions) {
+    if (!actions) return 0;
+    // Busca las acciones de "lead" más comunes
+    const leadTypes = ['lead', 'offsite_conversion.fb_pixel_lead', 'onsite_web_lead', 'leadgen_other'];
+    let totalLeads = 0;
+    
+    for (const action of actions) {
+        if (leadTypes.includes(action.action_type)) {
+            totalLeads += parseInt(action.value, 10);
+        }
+    }
+    return totalLeads;
+}
+
+// Función de ayuda para la llamada a la API
+async function fetchMetaInsights(url) {
+    const response = await fetch(url);
+    if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Error de la API de Meta:", errorData);
+        throw new Error(`Error de la API de Meta: ${errorData.error.message}`);
+    }
+    const data = await response.json();
+    return data.data; // Devolvemos solo el array 'data'
+}
+
+// El manejador principal que Vercel ejecutará
+export default async function handler(request, response) {
+    // 1. Obtener las variables secretas (que configuraremos en Vercel)
+    const accessToken = process.env.META_ACCESS_TOKEN;
+    const adAccountId = process.env.AD_ACCOUNT_ID;
+    
+    if (!accessToken || !adAccountId) {
+        return response.status(500).json({ error: "Variables de entorno no configuradas." });
+    }
+    
+    const baseUrl = `https://graph.facebook.com/v19.0/${adAccountId}/insights`;
+    const commonParams = `date_preset=last_30d&limit=1000&access_token=${accessToken}`;
+
+    try {
+        // 2. Hacemos múltiples llamadas a la API para obtener todos los datos que necesitamos
+        
+        // Llamada 1: KPIs a nivel de Cuenta
+        const kpiFields = 'spend,impressions,clicks,cpc,ctr,frequency,actions';
+        const kpiUrl = `${baseUrl}?level=account&fields=${kpiFields}&${commonParams}`;
+        
+        // Llamada 2: Desglose por Campaña (para tablas)
+        const campaignFields = 'campaign_name,status,spend,impressions,clicks,cpc,ctr,frequency,actions';
+        const campaignUrl = `${baseUrl}?level=campaign&fields=${campaignFields}&${commonParams}`;
+        
+        // Llamada 3: Desglose por Anuncio (para el Top 5)
+        const adFields = 'ad_name,actions';
+        const adUrl = `${baseUrl}?level=ad&fields=${adFields}&${commonParams}`;
+        
+        // Llamada 4: Desglose por País (para el gráfico Geo)
+        // ¡IMPORTANTE! Pedimos 'country_name' para tener el nombre legible
+        const geoFields = 'actions';
+        const geoUrl = `${baseUrl}?level=account&fields=${geoFields}&breakdowns=country&${commonParams}`;
+
+        // 3. Ejecutamos todas las llamadas en paralelo
+        const [kpiData, campaignData, adData, geoData] = await Promise.all([
+            fetchMetaInsights(kpiUrl),
+            fetchMetaInsights(campaignUrl),
+            fetchMetaInsights(adUrl),
+            fetchMetaInsights(geoUrl)
+        ]);
+
+        // 4. Procesamos y formateamos los datos en un JSON limpio (como nuestra simulación)
+        
+        // Procesar KPIs
+        const accountKpis = kpiData[0];
+        const total_leads = getLeadCount(accountKpis.actions);
+        const total_spend = parseFloat(accountKpis.spend);
+        const kpis = {
+            leads: total_leads,
+            cpl: total_leads > 0 ? total_spend / total_leads : 0,
+            ctr: parseFloat(accountKpis.ctr),
+            spend: total_spend,
+            frequency: parseFloat(accountKpis.frequency),
+            // NOTA: Los datos "prev_" (previos) no se piden para simplificar
+            prev_leads: total_leads * 0.9, // Simulación de datos previos
+            prev_cpl: (total_spend * 0.9) / (total_leads * 0.9) * 1.05, // Simulación
+            prev_ctr: parseFloat(accountKpis.ctr) * 0.95, // Simulación
+        };
+        
+        // Procesar Campañas
+        const campaigns = campaignData.map(c => {
+            const leads = getLeadCount(c.actions);
+            const spend = parseFloat(c.spend);
+            return {
+                campaign_name: c.campaign_name,
+                status: c.status === 'ACTIVE' ? 'Active' : 'Paused',
+                leads: leads,
+                spend: spend,
+                impressions: parseInt(c.impressions, 10),
+                clicks: parseInt(c.clicks, 10),
+                cpl: leads > 0 ? spend / leads : 0,
+                ctr: parseFloat(c.ctr),
+                cpc: parseFloat(c.cpc),
+                frequency: parseFloat(c.frequency)
+            };
+        });
+
+        // Procesar Top Anuncios
+        const topAds = adData
+            .map(ad => ({
+                ad_name: ad.ad_name,
+                leads: getLeadCount(ad.actions)
+            }))
+            .sort((a, b) => b.leads - a.leads) // Ordenar por más leads
+            .slice(0, 5); // Quedarnos con el Top 5
+            
+        // Procesar Geo
+        const geo = geoData
+            .map(g => ({
+                country: g.country, // El desglose de país ya nos da el código (ej. 'CO')
+                country_name: g.country, // La API devuelve el código en el campo 'country'
+                leads: getLeadCount(g.actions)
+            }))
+            .filter(g => g.leads > 0) // Quitar países sin leads
+            .sort((a, b) => b.leads - a.leads); // Ordenar
+
+        // 5. Enviar la respuesta final
+        response.status(200).json({
+            kpis,
+            campaigns,
+            topAds,
+            geo
+        });
+        
+    } catch (error) {
+        console.error("Error en la función serverless:", error);
+        response.status(500).json({ error: error.message });
+    }
+}
