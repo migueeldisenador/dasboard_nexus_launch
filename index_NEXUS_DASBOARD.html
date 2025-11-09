@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Métricas - Meta Ads</title>
+    
+    <!-- 1. Cargar Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- 2. Cargar Chart.js (para los gráficos) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- 3. Cargar Lucide (iconos) - URL ACTUALIZADA -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    
+    <!-- 4. Cargar la fuente (Inter) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* ESTILOS PERSONALIZADOS (CSS) */
+        
+        /* ... (Estilos de fuente, body, glass-card, widget-card, chart-glow, skeleton, fadeIn, scrollbar... sin cambios) ... */
+        :root {
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: #0B1120; /* Fondo principal oscuro */
+        }
+
+        /* Efecto "Glassmorphism" (vidrio) */
+        .glass-card {
+            background: rgba(40, 51, 80, 0.4); /* Color de fondo semi-transparente */
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(100, 116, 139, 0.3); /* Borde sutil */
+        }
+
+        /* Estilo de los widgets principales */
+        .widget-card {
+            background-color: #131B33; /* Fondo de las tarjetas */
+            border: 1px solid #222B45; /* Borde de las tarjetas */
+        }
+        
+        /* Efecto de brillo para los gráficos */
+        .chart-glow {
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.2), 0 0 40px rgba(59, 130, 246, 0.1);
+        }
+
+        /* Animación de carga (esqueleto/shimmer) */
+        .skeleton {
+            position: relative;
+            overflow: hidden;
+            background-color: #1E293B; /* Color base del esqueleto */
+        }
+        .skeleton::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(51, 65, 85, 0.5), transparent);
+            animation: shimmer 2s infinite linear;
+        }
+        @keyframes shimmer {
+            0% {
+                left: -100%;
+            }
+            100% {
+                left: 100%;
+            }
+        }
+        
+        /* Animación de aparición (fade-in) */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        
+        /* Estilos de la barra de scroll */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0B1120;
+        }
+        ::-webkit-scrollbar-thumb {
+            background-color: #222B45;
+            border-radius: 20px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background-color: #334155;
+        }
+    </style>
+</head>
+<body class="text-slate-200 font-sans antialiased">
+
+    <div class="flex h-screen overflow-hidden">
+        
+        <!-- ===== Barra Lateral (Sidebar) ===== -->
+        <aside id="sidebar" class="fixed left-0 top-0 z-40 flex h-screen w-64 flex-col overflow-y-hidden bg-[#131B33] border-r border-[#222B45] duration-300 ease-linear -translate-x-full lg:translate-x-0 lg:static">
+            
+            <!-- ... (Contenido de la barra lateral: Logo, Menú, Widget de Vidrio... sin cambios) ... -->
+            <!-- Logo -->
+            <div class="flex items-center justify-between gap-2 px-6 py-5.5 lg:py-6.5">
+                <a href="#" class="flex items-center gap-2">
+                    <svg class_name="w-8 h-8 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    <span class="text-xl font-bold text-white">TuLogo</span>
+                </a>
+                <button class="block lg:hidden" id="sidebar-close">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+
+            <!-- Menú de Navegación -->
+            <nav class="flex flex-col flex-1 px-4 py-4 overflow-y-auto">
+                <ul class="flex flex-col gap-1.5">
+                    <!-- Dashboard -->
+                    <li>
+                        <a href="#" class="group relative flex items-center gap-2.5 rounded-lg bg-blue-600/20 py-2 px-4 font-medium text-blue-300">
+                            <i data-lucide="layout-dashboard"></i>
+                            Dashboard
+                        </a>
+                    </li>
+                    <!-- Métricas -->
+                    <li>
+                        <a href="#" class="group relative flex items-center gap-2.5 rounded-lg py-2 px-4 font-medium text-slate-400 hover:bg-slate-700/50 hover:text-white">
+                            <i data-lucide="bar-chart-3"></i>
+                            Métricas
+                        </a>
+                    </li>
+                    <!-- Campañas -->
+                    <li>
+                        <a href="#" class="group relative flex items-center gap-2.5 rounded-lg py-2 px-4 font-medium text-slate-400 hover:bg-slate-700/50 hover:text-white">
+                            <i data-lucide="target"></i>
+                            Campañas
+                        </a>
+                    </li>
+                    <!-- Reportes -->
+                    <li>
+                        <a href="#" class="group relative flex items-center gap-2.5 rounded-lg py-2 px-4 font-medium text-slate-400 hover:bg-slate-700/50 hover:text-white">
+                            <i data-lucide="file-text"></i>
+                            Reportes
+                        </a>
+                    </li>
+                    <!-- Configuración -->
+                    <li>
+                        <a href="#" class="group relative flex items-center gap-2.5 rounded-lg py-2 px-4 font-medium text-slate-400 hover:bg-slate-700/50 hover:text-white">
+                            <i data-lucide="settings"></i>
+                            Configuración
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <!-- Widget de "Vidrio" (Glassmorphism) -->
+            <div class="px-6 py-6 mt-auto">
+                <div class="glass-card rounded-lg p-5 text-center">
+                    <h4 class="font-semibold text-white mb-2">Presupuesto Restante</h4>
+                    <div class="text-3xl font-bold text-teal-400 mb-3">$2,304</div>
+                    <p class="text-xs text-slate-300 mb-4">Quedan 5 días en el ciclo de facturación.</p>
+                    <button class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                        Añadir Fondos
+                    </button>
+                </div>
+            </div>
+        </aside>
+        <!-- ===== Fin Barra Lateral ===== -->
+
+        <!-- ===== Contenido Principal ===== -->
+        <div class="relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
+            
+            <!-- ===== Cabecera (Header) ===== -->
+            <header class="sticky top-0 z-30 flex w-full bg-[#0B1120]/80 backdrop-blur-sm border-b border-[#222B45]">
+                <!-- ... (Contenido de la cabecera: Título, Perfil... sin cambios) ... -->
+                <div class="flex flex-grow items-center justify-between px-4 py-4 md:px-6 2xl:px-11">
+                    
+                    <!-- Botón de Menú (móvil) y Título -->
+                    <div class="flex items-center gap-4">
+                        <button class="block lg:hidden" id="sidebar-open">
+                            <i data-lucide="menu" class="w-6 h-6"></i>
+                        </button>
+                        <h1 class="text-xl font-semibold text-white">Dashboard: Meta Ads</h1>
+                    </div>
+
+                    <!-- Búsqueda y Perfil -->
+                    <div class="flex items-center gap-4">
+                        <!-- Botón de Búsqueda -->
+                        <button class="p-2 rounded-full hover:bg-slate-700/50">
+                            <i data-lucide="search" class="w-5 h-5"></i>
+                        </button>
+                        
+                        <!-- Notificaciones -->
+                        <button class="relative p-2 rounded-full hover:bg-slate-700/50">
+                            <i data-lucide="bell" class="w-5 h-5"></i>
+                            <span class="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-500"></span>
+                        </button>
+                        
+                        <!-- Perfil de Usuario -->
+                        <div class="relative">
+                            <button class="flex items-center gap-2">
+                                <img src="https://placehold.co/40x40/3B82F6/FFFFFF?text=A&font=inter" alt="Perfil" class="w-10 h-10 rounded-full border-2 border-blue-500">
+                                <div>
+                                    <span class="hidden md:block font-medium text-white">Tu Nombre</span>
+                                    <span class="hidden md:block text-xs text-slate-400">Admin</span>
+                                </div>
+                                <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 hidden md:block"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            <!-- ===== Fin Cabecera ===== -->
+
+            <!-- ===== Área de Contenido Principal ===== -->
+            <main>
+                <div class="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
+                    
+                    <!-- KPIs Principales -->
+                    <div class="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5 mb-6">
+                        <!-- ... (Widgets de KPIs... sin cambios) ... -->
+                        <!-- KPI 1: Clics -->
+                        <div class="widget-card rounded-lg p-6 shadow-default">
+                            <!-- Contenido de carga -->
+                            <div class="skeleton-wrapper">
+                                <div class="skeleton h-8 w-3/4 mb-3 rounded"></div>
+                                <div class="skeleton h-5 w-1/2 rounded"></div>
+                            </div>
+                            <!-- Contenido real -->
+                            <div class="widget-content opacity-0">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h4 class="text-sm font-medium text-slate-400">Clics Totales</h4>
+                                        <span class="text-3xl font-bold text-white">12,450</span>
+                                    </div>
+                                    <span class="flex items-center justify-center w-12 h-12 rounded-full bg-blue-600/20 text-blue-400">
+                                        <i data-lucide="mouse-pointer-click" class="w-6 h-6"></i>
+                                    </span>
+                                </div>
+                                <div class="flex items-center gap-2 mt-2 text-sm text-green-400">
+                                    <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+                                    <span>12.5%</span>
+                                    <span class="text-slate-400">vs mes anterior</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- KPI 2: Impresiones -->
+                        <div class="widget-card rounded-lg p-6 shadow-default">
+                            <!-- Contenido de carga -->
+                            <div class="skeleton-wrapper">
+                                <div class="skeleton h-8 w-3/4 mb-3 rounded"></div>
+                                <div class="skeleton h-5 w-1/2 rounded"></div>
+                            </div>
+                            <!-- Contenido real -->
+                            <div class="widget-content opacity-0">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h4 class="text-sm font-medium text-slate-400">Impresiones</h4>
+                                        <span class="text-3xl font-bold text-white">1.2M</span>
+                                    </div>
+                                    <span class="flex items-center justify-center w-12 h-12 rounded-full bg-teal-600/20 text-teal-400">
+                                        <i data-lucide="eye" class="w-6 h-6"></i>
+                                    </span>
+                                </div>
+                                <div class="flex items-center gap-2 mt-2 text-sm text-green-400">
+                                    <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+                                    <span>8.2%</span>
+                                    <span class="text-slate-400">vs mes anterior</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- KPI 3: CTR -->
+                        <div class="widget-card rounded-lg p-6 shadow-default">
+                            <!-- Contenido de carga -->
+                            <div class="skeleton-wrapper">
+                                <div class="skeleton h-8 w-3/4 mb-3 rounded"></div>
+                                <div class="skeleton h-5 w-1/2 rounded"></div>
+                            </div>
+                            <!-- Contenido real -->
+                            <div class="widget-content opacity-0">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h4 class="text-sm font-medium text-slate-400">CTR (Click-Through Rate)</h4>
+                                        <span class="text-3xl font-bold text-white">1.04%</span>
+                                    </div>
+                                    <span class="flex items-center justify-center w-12 h-12 rounded-full bg-purple-600/20 text-purple-400">
+                                        <i data-lucide="percent" class="w-6 h-6"></i>
+                                    </span>
+                                </div>
+                                <div class="flex items-center gap-2 mt-2 text-sm text-red-400">
+                                    <i data-lucide="arrow-down-right" class="w-4 h-4"></i>
+                                    <span>-0.5%</span>
+                                    <span class="text-slate-400">vs mes anterior</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- KPI 4: Gasto Total -->
+                        <div class="widget-card rounded-lg p-6 shadow-default">
+                            <!-- Contenido de carga -->
+                            <div class="skeleton-wrapper">
+                                <div class="skeleton h-8 w-3/4 mb-3 rounded"></div>
+                                <div class="skeleton h-5 w-1/2 rounded"></div>
+                            </div>
+                            <!-- Contenido real -->
+                            <div class="widget-content opacity-0">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h4 class="text-sm font-medium text-slate-400">Gasto Total</h4>
+                                        <span class="text-3xl font-bold text-white">$5,820</span>
+                                    </div>
+                                    <span class="flex items-center justify-center w-12 h-12 rounded-full bg-green-600/20 text-green-400">
+                                        <i data-lucide="dollar-sign" class="w-6 h-6"></i>
+                                    </span>
+                                </div>
+                                <div class="flex items-center gap-2 mt-2 text-sm text-slate-400">
+                                    <i data-lucide="minus" class="w-4 h-4"></i>
+                                    <span>2.0%</span>
+                                    <span class="text-slate-400">vs mes anterior</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Fila de Gráficos Principales -->
+                    <div class="grid grid-cols-1 gap-4 md:gap-6 xl:grid-cols-3 2xl:gap-7.5 mb-6">
+                        
+                        <!-- Gráfico Principal (Rendimiento General) -->
+                        <div class="widget-card rounded-lg p-6 shadow-default xl:col-span-2">
+                            <!-- ... (Contenido del gráfico principal... sin cambios) ... -->
+                            <h4 class="text-lg font-semibold text-white mb-4">Rendimiento General (Últimos 30 días)</h4>
+                            
+                            <!-- Contenido de carga -->
+                            <div class="skeleton-wrapper">
+                                <div class="skeleton h-80 w-full rounded-lg"></div>
+                            </div>
+                            <!-- Contenido real (Gráfico) -->
+                            <div class="widget-content opacity-0 h-80">
+                                <canvas id="mainChart" class="chart-glow"></canvas>
+                            </div>
+                        </div>
+                        
+                        <!-- Gráfico Donut (ROAS) -->
+                        <div class="widget-card rounded-lg p-6 shadow-default">
+                            <!-- ... (Contenido del gráfico ROAS... sin cambios) ... -->
+                            <h4 class="text-lg font-semibold text-white mb-4">Gasto vs Retorno (ROAS)</h4>
+                            
+                            <!-- Contenido de carga -->
+                            <div class="skeleton-wrapper">
+                                <div class="skeleton h-80 w-full rounded-lg"></div>
+                            </div>
+                            <!-- Contenido real (Gráfico) -->
+                            <div class="widget-content opacity-0 h-80 flex items-center justify-center">
+                                <canvas id="roasChart" class="chart-glow"></canvas>
+                            </div>
+                        </div>
+
+                    </div>
+                    
+                    <!-- Fila de Gráficos Secundarios -->
+                    <div class="grid grid-cols-1 gap-4 md:gap-6 xl:grid-cols-2 2xl:gap-7.5">
+
+                        <!-- Gráfico de Barras (Top Campañas) -->
+                        <div class="widget-card rounded-lg p-6 shadow-default relative"> 
+                            <h4 class="text-lg font-semibold text-white mb-4">Rendimiento por Campaña</h4>
+                            
+                            <!-- Contenido de carga -->
+                            <div class="skeleton-wrapper">
+                                <div class="skeleton h-80 w-full rounded-lg"></div>
+                            </div>
+                            <!-- Contenido real (Gráfico) -->
+                            <div class="widget-content opacity-0 h-80">
+                                <canvas id="campaignChart"></canvas>
+                            </div>
+
+                            <!-- Overlay de Actualización -->
+                            <div id="campaign-refresh-overlay" class="absolute inset-0 bg-[#131B33]/80 backdrop-blur-sm flex items-center justify-center text-white font-medium rounded-lg opacity-0 transition-opacity duration-300 pointer-events-none z-10">
+                                <i data-lucide="refresh-cw" class="w-6 h-6 animate-spin mr-2"></i>
+                                Actualizando datos...
+                            </div>
+                        </div>
+                        
+                        <!-- Gráfico de Barras Horizontales (Demografía) -->
+                        <div class="widget-card rounded-lg p-6 shadow-default">
+                            <!-- ... (Contenido del gráfico de demografía... sin cambios) ... -->
+                            <h4 class="text-lg font-semibold text-white mb-4">Clics por Edad</h4>
+                            
+                            <!-- Contenido de carga -->
+                            <div class="skeleton-wrapper">
+                                <div class="skeleton h-80 w-full rounded-lg"></div>
+                            </div>
+                            <!-- Contenido real (Gráfico) -->
+                            <div class="widget-content opacity-0 h-80">
+                                <canvas id="demographicsChart"></canvas>
+                            </div>
+                        </div>
+                        
+                    </div>
+
+                </div>
+            </main>
+            <!-- ===== Fin Área de Contenido Principal ===== -->
+            
+        </div>
+        <!-- ===== Fin Contenido Principal ===== -->
+
+    </div>
+
+    <!-- ===== LÓGICA DE JAVASCRIPT ===== -->
+    <script>
+        // --- CONFIGURACIÓN DE LA API DE META ---
+        // ¡IMPORTANTE! Reemplaza estos valores con tus propios datos.
+        const META_ACCESS_TOKEN = '61583468942782'; // Tu token con permisos ads_read
+        const AD_ACCOUNT_ID = 'act_1147840960820826'; // Tu ID de cuenta de anuncios (con prefijo act_)
+        // --- FIN DE LA CONFIGURACIÓN ---
+
+
+        // Configuración global de Chart.js para modo oscuro
+        Chart.defaults.color = '#94a3b8'; // slate-400
+        Chart.defaults.borderColor = '#334155'; // slate-700
+        Chart.defaults.font.family = 'Inter, sans-serif';
+
+        // --- Variables Globales para Gráficos ---
+        let campaignChartInstance = null; 
+
+
+        // --- Lógica Principal (Animación, Menú, Gráficos) ---
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // 1. Inicializar iconos
+            try {
+                lucide.createIcons();
+            } catch (e) {
+                console.error("Error al inicializar iconos de Lucide:", e);
+            }
+
+            // 2. Lógica del Menú Móvil
+            const sidebar = document.getElementById('sidebar');
+            const sidebarOpen = document.getElementById('sidebar-open');
+            const sidebarClose = document.getElementById('sidebar-close');
+
+            sidebarOpen?.addEventListener('click', () => {
+                sidebar.classList.remove('-translate-x-full');
+            });
+
+            sidebarClose?.addEventListener('click', () => {
+                sidebar.classList.add('-translate-x-full');
+            });
+
+            // 3. Lógica de la Animación de Carga
+            const skeletons = document.querySelectorAll('.skeleton-wrapper');
+            const widgets = document.querySelectorAll('.widget-content');
+
+            widgets.forEach(w => w.classList.add('opacity-0', 'h-0', 'overflow-hidden'));
+            
+            // Simular carga de datos (2 segundos) - Mantenemos esto para los widgets estéticos
+            setTimeout(() => {
+                skeletons.forEach(s => s.classList.add('hidden'));
+                
+                widgets.forEach(w => {
+                    w.classList.remove('opacity-0', 'h-0', 'overflow-hidden');
+                    w.classList.add('fade-in');
+                });
+                
+                // Inicializar los gráficos
+                initMainChart();
+                initRoasChart();
+                initCampaignChart(); // Inicializa el gráfico (aún vacío o con datos iniciales)
+                initDemographicsChart();
+                
+                // Cargar datos de campañas por primera vez
+                updateCampaignData(); 
+
+                // Iniciar el temporizador de actualización
+                setInterval(updateCampaignData, 90000); // 90000ms = 90 segundos
+
+            }, 2000); 
+        });
+        
+        
+        // --- CAMBIO: FUNCIÓN `updateCampaignData` AHORA USA FETCH ---
+        
+        function updateCampaignData() {
+            const overlay = document.getElementById('campaign-refresh-overlay');
+            if (!campaignChartInstance || !overlay) {
+                console.log("No se puede actualizar, el gráfico o el overlay no existen.");
+                return;
+            }
+
+            // 1. Validar que el token y el ID no sean los de por defecto
+            if (META_ACCESS_TOKEN === 'TU_ACCESS_TOKEN_AQUI' || AD_ACCOUNT_ID === 'act_TU_AD_ACCOUNT_ID_AQUI') {
+                console.warn("Por favor, añade tu ACCESS_TOKEN y AD_ACCOUNT_ID en el script.");
+                // Opcional: podrías ocultar el overlay si ya estaba visible
+                overlay.classList.remove('opacity-100');
+                overlay.classList.add('opacity-0', 'pointer-events-none');
+                return; // No continuar si no hay credenciales
+            }
+            
+            // 2. Construir la URL de la API
+            const apiUrl = `https://graph.facebook.com/v19.0/${AD_ACCOUNT_ID}/insights?fields=campaign_name,cpc&date_preset=last_30d&access_token=${META_ACCESS_TOKEN}`;
+
+            // 3. Mostrar overlay de actualización
+            overlay.classList.remove('opacity-0', 'pointer-events-none');
+            overlay.classList.add('opacity-100');
+
+            // 4. Realizar la llamada a la API
+            fetch(apiUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Error de red o API: ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data && data.data) {
+                        // 5. Procesar los datos
+                        const labels = data.data.map(item => item.campaign_name);
+                        const cpcData = data.data.map(item => parseFloat(item.cpc || 0)); // Asegurarse de que sea un número
+
+                        // 6. Asignar los nuevos datos al gráfico
+                        campaignChartInstance.data.labels = labels;
+                        campaignChartInstance.data.datasets[0].data = cpcData;
+                        
+                        // 7. Llamar a update() - ¡Esto genera la transición fluida!
+                        campaignChartInstance.update();
+                    } else {
+                        console.error("Respuesta inesperada de la API:", data);
+                    }
+                })
+                .catch(error => {
+                    console.error("Error al cargar datos de campañas:", error);
+                    // NOTA IMPORTANTE: Si ves un error de 'CORS' aquí,
+                    // significa que la API de Meta no permite ser llamada
+                    // directamente desde un archivo HTML en tu navegador.
+                    // Necesitarás un servidor (backend o proxy)
+                    // para hacer esta llamada de forma segura.
+                })
+                .finally(() => {
+                    // 8. Ocultar el overlay de actualización
+                    overlay.classList.remove('opacity-100');
+                    overlay.classList.add('opacity-0', 'pointer-events-none');
+                });
+        }
+
+
+        // --- Inicialización de Gráficos ---
+
+        // 1. Gráfico Principal (Línea)
+        function initMainChart() {
+            // ... (Función initMainChart sin cambios) ...
+            const ctx = document.getElementById('mainChart');
+            if (!ctx) return;
+            
+            const gradientBlue = ctx.getContext('2d').createLinearGradient(0, 0, 0, 400);
+            gradientBlue.addColorStop(0, 'rgba(59, 130, 246, 0.5)');
+            gradientBlue.addColorStop(1, 'rgba(59, 130, 246, 0)');
+            
+            const gradientTeal = ctx.getContext('2d').createLinearGradient(0, 0
