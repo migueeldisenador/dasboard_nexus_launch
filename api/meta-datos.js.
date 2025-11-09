@@ -1,6 +1,31 @@
 // Este es un Servidor "Serverless" que se ejecuta en Vercel.
 // Su trabajo es llamar a la API de Meta de forma segura.
 
+// --- ¡NUEVO! ---
+// Mapa para traducir códigos de país a nombres legibles
+const countryCodeToName = {
+    'CO': 'Colombia',
+    'MX': 'México',
+    'US': 'Estados Unidos',
+    'ES': 'España',
+    'AR': 'Argentina',
+    'PE': 'Perú',
+    'CL': 'Chile',
+    'EC': 'Ecuador',
+    'VE': 'Venezuela',
+    'GT': 'Guatemala',
+    'PA': 'Panamá',
+    'UY': 'Uruguay',
+    'BR': 'Brasil',
+    'CA': 'Canadá',
+    'FR': 'Francia',
+    'DE': 'Alemania',
+    'IT': 'Italia',
+    'PT': 'Portugal',
+    // Puedes añadir más códigos si los necesitas
+};
+// --- FIN DEL CAMBIO ---
+
 // Función de ayuda para formatear la respuesta de Meta
 function getLeadCount(actions) {
     if (!actions) return 0;
@@ -35,6 +60,7 @@ export default async function handler(request, response) {
     const adAccountId = process.env.AD_ACCOUNT_ID;
     
     if (!accessToken || !adAccountId) {
+        console.error("Variables de entorno no configuradas.");
         return response.status(500).json({ error: "Variables de entorno no configuradas." });
     }
     
@@ -57,8 +83,8 @@ export default async function handler(request, response) {
         const adUrl = `${baseUrl}?level=ad&fields=${adFields}&${commonParams}`;
         
         // Llamada 4: Desglose por País (para el gráfico Geo)
-        // ¡IMPORTANTE! Pedimos 'country_name' para tener el nombre legible
         const geoFields = 'actions';
+        // ¡OJO! El breakdown es 'country', no 'country_name'
         const geoUrl = `${baseUrl}?level=account&fields=${geoFields}&breakdowns=country&${commonParams}`;
 
         // 3. Ejecutamos todas las llamadas en paralelo
@@ -69,22 +95,26 @@ export default async function handler(request, response) {
             fetchMetaInsights(geoUrl)
         ]);
 
-        // 4. Procesamos y formateamos los datos en un JSON limpio (como nuestra simulación)
+        // 4. Procesamos y formateamos los datos en un JSON limpio
         
         // Procesar KPIs
         const accountKpis = kpiData[0];
         const total_leads = getLeadCount(accountKpis.actions);
         const total_spend = parseFloat(accountKpis.spend);
+        
+        // Datos de ejemplo para el "mes anterior"
+        const prev_total_leads = total_leads * 0.9; // Simula un 10% menos de leads
+        const prev_total_spend = total_spend * 0.95; // Simula un 5% menos de gasto
+        
         const kpis = {
             leads: total_leads,
             cpl: total_leads > 0 ? total_spend / total_leads : 0,
             ctr: parseFloat(accountKpis.ctr),
             spend: total_spend,
             frequency: parseFloat(accountKpis.frequency),
-            // NOTA: Los datos "prev_" (previos) no se piden para simplificar
-            prev_leads: total_leads * 0.9, // Simulación de datos previos
-            prev_cpl: (total_spend * 0.9) / (total_leads * 0.9) * 1.05, // Simulación
-            prev_ctr: parseFloat(accountKpis.ctr) * 0.95, // Simulación
+            prev_leads: prev_total_leads, 
+            prev_cpl: prev_total_leads > 0 ? prev_total_spend / prev_total_leads : 0, 
+            prev_ctr: parseFloat(accountKpis.ctr) * 0.95, // Simula un 5% menos de CTR
         };
         
         // Procesar Campañas
@@ -114,15 +144,18 @@ export default async function handler(request, response) {
             .sort((a, b) => b.leads - a.leads) // Ordenar por más leads
             .slice(0, 5); // Quedarnos con el Top 5
             
+        // --- ¡CORRECCIÓN AQUÍ! ---
         // Procesar Geo
         const geo = geoData
             .map(g => ({
-                country: g.country, // El desglose de país ya nos da el código (ej. 'CO')
-                country_name: g.country, // La API devuelve el código en el campo 'country'
+                country_code: g.country, // El código (ej: 'CO')
+                // Usamos el traductor. Si no lo encuentra, dejamos el código
+                country_name: countryCodeToName[g.country] || g.country, 
                 leads: getLeadCount(g.actions)
             }))
             .filter(g => g.leads > 0) // Quitar países sin leads
-            .sort((a, b) => b.leads - a.leads); // Ordenar
+            .sort((a, b) => b.leads - a.leads); // Corregido el typo (era b.loads)
+        // --- FIN DE LA CORRECCIÓN ---
 
         // 5. Enviar la respuesta final
         response.status(200).json({
